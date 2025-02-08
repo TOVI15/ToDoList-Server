@@ -25,15 +25,15 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseCors("AllowAll");
 
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI(options => 
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
     });
-}
+// }
 
 // Map endpoints
 app.MapGet("/", () => "This is a GET");
