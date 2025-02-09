@@ -3,12 +3,13 @@ using TodoApi;
 using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<ToDoDbContext>();
+
+// שנה את השורה הזו מ- AddSingleton ל- AddDbContext
+builder.Services.AddDbContext<ToDoDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("ToDoDB"), ServerVersion.Parse("8.0.41-mysql")));
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddDbContext<ToDoDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("dbToDo")));
 
 builder.Services.AddCors(options =>
 {
@@ -26,38 +27,30 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseCors("AllowAll");
 
-// if (app.Environment.IsDevelopment())
-// {
-    app.UseSwagger();
-    app.UseSwaggerUI(options => 
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-        options.RoutePrefix = string.Empty;
-    });
-// }
+app.UseSwagger();
+app.UseSwaggerUI(options => 
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
 
-// Map endpoints
+// מיפוי נקודות קצה
 app.MapGet("/", () => "This is a GET");
 
-// GET all items
-// app.MapGet("/items", async (ToDoDbContext dbContext) =>
-// {
-//     var items = await dbContext.Items.ToListAsync();
-//     return Results.Ok(items);
-// });
+// קבלת כל הפריטים
 app.MapGet("/items", (ToDoDbContext context) =>
 {
     return context.Items.ToList();
 });
 
-// GET item by ID
+// קבלת פריט לפי ID
 app.MapGet("/items/{id}", async (int id, ToDoDbContext dbContext) =>
 {
     var item = await dbContext.Items.FindAsync(id);
     return item is not null ? Results.Ok(item) : Results.NotFound();
 });
 
-// POST new item
+// הוספת פריט חדש
 app.MapPost("/items", async (Item item, ToDoDbContext dbContext) =>
 {
     dbContext.Items.Add(item);
@@ -65,7 +58,7 @@ app.MapPost("/items", async (Item item, ToDoDbContext dbContext) =>
     return Results.Created($"/items/{item.Id}", item);
 });
 
-// PUT update item
+// עדכון פריט
 app.MapPut("/items/{id}", async (int id, Item updatedItem, ToDoDbContext dbContext) =>
 {
     var item = await dbContext.Items.FindAsync(id);
@@ -78,7 +71,7 @@ app.MapPut("/items/{id}", async (int id, Item updatedItem, ToDoDbContext dbConte
     return Results.Ok(item);
 });
 
-// DELETE item
+// מחיקת פריט
 app.MapDelete("/items/{id}", async (int id, ToDoDbContext dbContext) =>
 {
     var item = await dbContext.Items.FindAsync(id);
