@@ -56,12 +56,11 @@ app.MapPost("/items", async (Item item, ToDoDbContext dbContext) =>
 });
 
 // עדכון פריט
-app.MapPut("/items/{id}", async (int id, Item updatedItem, ToDoDbContext dbContext) =>
+app.MapPut("/items/{id}", async (int id, bool updatedItem, ToDoDbContext dbContext) =>
 {
     var item = await dbContext.Items.FindAsync(id);
     if (item is null) return Results.NotFound();
 
-    item.Name = updatedItem.Name;
     item.IsComplete = updatedItem.IsComplete;
 
     await dbContext.SaveChangesAsync();
