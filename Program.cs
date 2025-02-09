@@ -11,16 +11,13 @@ builder.Services.AddDbContext<ToDoDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+
 builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000")
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
-});
+    options.AddPolicy("AllowAll", p => p
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader())
+        );
 
 builder.Services.AddSwaggerGen();
 
